@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken');
 let books = require("./booksdb.js");
 const regd_users = express.Router();
 
-let users = [];
-
 const isValid = (username)=>{ //returns boolean
 //write code to check is the username is valid
 }
@@ -12,6 +10,21 @@ const isValid = (username)=>{ //returns boolean
 const authenticatedUser = (username,password)=>{ //returns boolean
 //write code to check if username and password match the one we have in records.
 }
+
+const users = {};
+
+regd_users.post('/register', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+    }
+    if (users[username]) {
+        return res.status(409).json({ message: "Username already exists" });
+    }
+    users[username] = { username, password };
+    res.status(201).json({ message: "User registered successfully" });
+});
+
 
 //only registered users can login
 regd_users.post('/login', (req, res) => {

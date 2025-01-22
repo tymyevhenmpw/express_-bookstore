@@ -11,20 +11,19 @@ app.use(express.json());
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req, res, next) {
-    const token = req.session.token;
-
+    const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-        return res.status(403).json({ message: "Authentication token required" });
+        return res.status(401).json({ message: "Authentication token required" });
     }
-
-    jwt.verify(token, "fingerprint_customer", (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ message: "Invalid or expired token" });
-        }
-        req.user = decoded;
+    try {
+        const decoded = jwt.verify(token, "fingerprint_customer");
+        req.user = decoded; 
         next();
-    });
+    } catch (err) {
+        return res.status(403).json({ message: "Invalid token" });
+    }
 });
+
 
  
 const PORT =5000;
